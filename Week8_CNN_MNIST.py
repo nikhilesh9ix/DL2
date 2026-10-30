@@ -1,4 +1,5 @@
-# Week 8: CNN on MNIST with Pooling Demonstration
+# Week 8: CNN on MNIST with Convolution and Pooling Demonstrations
+import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras import Sequential, layers
@@ -12,6 +13,85 @@ print("Max Pooling:")
 print(tf.nn.max_pool2d(feature, 2, 2, "VALID").numpy()[0, :, :, 0])
 print("Average Pooling:")
 print(tf.nn.avg_pool2d(feature, 2, 2, "VALID").numpy()[0, :, :, 0])
+
+# Create a simple 7x7 grayscale image
+image = np.array([
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0]
+], dtype=np.float32)
+
+image = image.reshape(1, 7, 7, 1)
+
+# Define different convolution kernels
+vertical_edge = np.array([
+    [-1, 0, 1],
+    [-1, 0, 1],
+    [-1, 0, 1]
+], dtype=np.float32).reshape(3, 3, 1, 1)
+
+horizontal_edge = np.array([
+    [-1, -1, -1],
+    [ 0,  0,  0],
+    [ 1,  1,  1]
+], dtype=np.float32).reshape(3, 3, 1, 1)
+
+sharpen = np.array([
+    [ 0, -1,  0],
+    [-1,  5, -1],
+    [ 0, -1,  0]
+], dtype=np.float32).reshape(3, 3, 1, 1)
+
+
+# Perform convolution
+vertical_output = tf.nn.conv2d(
+    image, vertical_edge,
+    strides=1,
+    padding="SAME"
+)
+
+horizontal_output = tf.nn.conv2d(
+    image, horizontal_edge,
+    strides=1,
+    padding="SAME"
+)
+
+sharpen_output = tf.nn.conv2d(
+    image, sharpen,
+    strides=1,
+    padding="SAME"
+)
+
+
+# Display convolution results
+plt.figure(figsize=(12, 3))
+
+plt.subplot(1, 4, 1)
+plt.imshow(image[0, :, :, 0], cmap="gray")
+plt.title("Original Image")
+plt.axis("off")
+
+plt.subplot(1, 4, 2)
+plt.imshow(vertical_output[0, :, :, 0], cmap="gray")
+plt.title("Vertical Edge")
+plt.axis("off")
+
+plt.subplot(1, 4, 3)
+plt.imshow(horizontal_output[0, :, :, 0], cmap="gray")
+plt.title("Horizontal Edge")
+plt.axis("off")
+
+plt.subplot(1, 4, 4)
+plt.imshow(sharpen_output[0, :, :, 0], cmap="gray")
+plt.title("Sharpening")
+plt.axis("off")
+
+plt.tight_layout()
+plt.show()
 
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 X_train, X_test = X_train / 255.0, X_test / 255.0
